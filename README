@@ -1,0 +1,58 @@
+Mandru Cosmina
+333CB
+				
+
+						Tema3 - LFA
+
+	Parsarea Regexului: Am pornit de la scheletul de cod al labratorului 11, 
+adaptandu-l pentru a functiona pe expresii regulate.  Astefel am pastrat clasa
+Expr din care deriveaza urmatoarele: Concat, Union, Star, Par si Character. 
+Parserul, construit pe baza pda-ului, are 2 stari iar tranzitiile le-am adaugat
+pornind de la pda-ul pentru expresiile aritmetice. Stiva am reprezentat-o printr-o
+stiva iar pentru accesarea elementelor de la varful stivei in jos am facut metoda
+peek. In Parser sunt definite urmatoarele metode:
+	- nextState: care intoarce starea urmatoare, primind o stare curent si actualizeaza
+		si stiva.
+	- reduce: este metoda care ajuta de a avea in final o singura expresie de tipul Expr;
+		apeland metodele reduceCharacter, reducePar, reduceConcat, reduceUnion, reduceStar.
+		Aceste sunt descrise prin comentariile din cod.
+	- parse: primeste stringul ce trebuie sa devina de tipul Expr. Se parcurce inputul
+		caracter cu caracter si in functie daca este litera sau unul dintre simbolurile
+		ce desemneaza o operatie se apeleaza reduce. Pentru cazurile de genul "**", cand
+		intalnesc primul "*", verific daca mai urmeaza asemenea simbol si apelez reduceStar
+		pentru ca aceasta trebuie apelat strict pe expresia de dinaitea primului simbol "*"
+		si pentru a fi sigura ca reduceStar se executa inainte de reduceUnion.
+		Pentru ca reduceUnion este operatie ce trebuie realizata ultima aceasta va fi apelata
+		doar daca: -> am ajuns la simbolul de tipul ")", atunci realizez toate operatiile de tip
+					Union ce se afla in interiorul parantezei respective, aflandu-se inca 
+					pe stiva
+				   -> am terminat de parcurs tot inputul si pe stiva au ramas doar elemente de 
+				   tipul Expr si simbolul "|" ce desemneaza Union; astfel voi apela reduceUnion
+				   pana cand pe stiva imi ramane un singur element si acela e rezultatul final.
+	Dupa citirea inputului din fisier apelez functioa de generateAlphabet pentru a genera alfabetul
+specific expresiei date. Imediat dupa apelez convertInput pentru a introduce simbolul "+" ce va
+reprezenta concatenarea.
+	Convertire Regex in NFA: Am preluat clasa NFA din Tema2. Pentru a face aceasta conversie m-am
+folosit de conceputl de mostenire. Astfel in fiecare clasa ce deriveaza din clasa Expr am 
+implementat metoda eval.
+	-> Character: eval -> metoda treboie sa intoarca un NFA pentru caracterul respectiv ce este
+					format doar din 2 stari si o tranzitie intre acestea pe caracterul dat.
+	-> Par: eval -> pentru o expresie de tip par, apelez eval pentru expresia "dintre paranteze"
+	-> Star: eval -> pentru nfa-ul intrors dupa apelarea evalului pe expresia primita, trebuie sa 
+					introduse o noua stare initiala si finale ce vor fi legate pe epsilon de
+					starea initiala actuala, respectiv starea finala actuala dupa ce au fost
+					redenumite. De asemenea atat intre starea finala si initiale curente si 
+					cele noi introduse trebuie sa exite o tranzitie pe eps. Intorc nfa-ul rezultat
+					cu un numar nou de tranzitii si o noua stare finala
+	-> Union: eval -> realizeaza un nou nfa dintre nfa-urile intoarse dupa apelarea metodei eval pe
+					expresia din stanga, respectiv dreapta. Astfel introduc o noua stare initiala
+					cu tranztii pe epsilon catre cele 2 stari initiale ale nfa-urilor cu stari
+					redenumite. Pentru noul nfa introduc si o noua stare finala la care se ajunge pe
+					epsilon plecand din fostele stari finale ale nfa-urilor dupa ce au fost redenumite.
+	-> Concat: eval -> se apeleaza pentru expresia din stanga si din dreapta metoda eval pentru a
+					intoarce nfa-urile corespunzatoare lor. Astfel starea finala a nfa-ului din
+					stanga devine starea initiala a celui din dreapta, si toate starile acestuia
+					sunt redenumite. Starea finala a nfa-ului curent o va reprezenta starea finala
+					a nfa-ului din dreapta.
+	Dupa ce se iese din "recursivitatea" ce a realizat nfa-ul final, scriu datele corespunzatoare
+	acestuia in fisier si apelez Tema 2.
